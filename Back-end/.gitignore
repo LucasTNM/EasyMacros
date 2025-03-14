@@ -1,0 +1,8 @@
+# Ignorar node_modules
+node_modules/
+
+# Ignorar o arquivo .env com as variáveis de ambiente
+.env
+
+# Ignorar o arquivo package-lock.json, caso não queira versionar as dependências
+package-lock.json
