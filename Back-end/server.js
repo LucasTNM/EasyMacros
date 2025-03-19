@@ -3,6 +3,7 @@ import connectDB from './config/db.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import userRoutes from './Routes/userRoutes.js'
+import chatRoutes from './Routes/chatRoutes.js'
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/api', userRoutes);
+app.use('/api/chat', chatRoutes);
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
