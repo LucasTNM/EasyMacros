@@ -18,14 +18,13 @@ export const tmbCalculator = async (req, res) => {
             return res.status(404).json({ message: "Usuário encontrado, mas sem informações cadastradas (peso, altura, etc.)." });
         }
 
-        // Função para calcular a TMB (Taxa Metabólica Basal)
         const calcularTMB = (idade, peso, altura, sexo) => {
             if (sexo === "Masculino") {
                 return Math.round((10 * peso) + (6.25 * altura) - (5 * idade) + 5);
             } else if (sexo === "Feminino") {
                 return Math.round((10 * peso) + (6.25 * altura) - (5 * idade) - 161);
             } else {
-                return null; // Sexo inválido
+                return null;
             }
         };
 
@@ -34,7 +33,6 @@ export const tmbCalculator = async (req, res) => {
             return res.status(400).json({ message: "Sexo inválido ou não especificado." });
         }
 
-        // Função para calcular o gasto total diário de energia
         const calcularGastoTotal = (tmb, nivelAtividade) => {
             const fatoresAtividade = {
                 "Sedentário": 1.2,
@@ -52,17 +50,14 @@ export const tmbCalculator = async (req, res) => {
             return res.status(400).json({ message: "Nível de atividade inválido ou não definido." });
         }
 
-        // Verifica se já existe um registro de metabolismo para o usuário
         const existingMetabolism = await UserMetabolism.findOne({ userId: user._id });
 
         if (existingMetabolism) {
-            // Atualiza o metabolismo existente
             await UserMetabolism.updateOne(
                 { userId: user._id },
                 { $set: { taxaMetabolicaBasal, gastoTotalDiario } }
             );
         } else {
-            // Cria um novo registro de metabolismo
             const userMetabolism = new UserMetabolism({
                 userId: user._id,
                 taxaMetabolicaBasal,
@@ -90,7 +85,7 @@ export const tmbCalculator = async (req, res) => {
 
   export const macrosCalculator = async (req, res) => {
     const { email } = req.params;
-    const { calorias } = req.body; // Calorias opcionais fornecidas pelo usuário
+    const { calorias } = req.body;
   
     try {
       const user = await User.findOne({ email });
@@ -111,7 +106,6 @@ export const tmbCalculator = async (req, res) => {
       let gastoTotalDiario = userMetabolism.gastoTotalDiario;
       console.log(`Gasto Total Diário Inicial: ${gastoTotalDiario}`);
   
-      // Definir valor padrão para calorias se não for fornecido
       const caloriasValidas = calorias !== undefined ? calorias : 0;
       const Min = Math.round(userMetabolism.taxaMetabolicaBasal * 1.05);
   

@@ -15,7 +15,7 @@ app.use(express.json());
 
 app.use(cors());
 
-app.use('/api', userRoutes);
+app.use('/api/user', userRoutes);
 app.use('/api/chat', chatRoutes);
 
 const PORT = process.env.PORT || 10000;

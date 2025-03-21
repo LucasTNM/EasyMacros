@@ -16,6 +16,14 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    codigoRedefinicao: {
+      type: Number,
+      required: false,
+    },
+    dataRedefinicao: {
+      type: Date,
+      required: false,
+    },
   },
   {
     timestamps: true,
