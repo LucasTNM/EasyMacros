@@ -1,11 +1,12 @@
 import express from 'express';
 import * as userController from '../controller/userController.js';
 import * as metabolismController from '../controller/metabolismController.js'
+import { verifyToken } from '../middleware/token.js';
 
 const router = express.Router();
 
 router.post('/register', userController.registerUser);
-router.get('/find/:email', userController.getUser);
+router.get('/find/:email', verifyToken, userController.getUser);
 router.delete('/deleteUser/:email', userController.deleteUser);
 router.post('/login', userController.Login);
 router.post('/tmbCalculator/:email', metabolismController.tmbCalculator);

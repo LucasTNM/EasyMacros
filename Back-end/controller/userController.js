@@ -58,6 +58,14 @@ export const registerUser = async (req, res) => {
 
     await userInfo.save();
 
+    const token = jwt.sign(
+      { _id: createdUser._id, email: createdUser.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.cookie("token", token, { maxAge: 3600000, httpOnly: true });
+
     res.status(201).json({
       _id: createdUser._id,
       nome: createdUser.nome,
@@ -214,7 +222,7 @@ export const Login = async (req, res) => {
         { expiresIn: "1h" }
       );
 
-      res.cookie("token", token, { masAge: 3600000, httpOnly: true });
+      res.cookie("token", token, { maxAge: 3600000, httpOnly: true });
 
       return res.status(200).json({ message: "login feito com sucesso." });
     }
