@@ -182,6 +182,20 @@ export const getUser = async (req, res) => {
   }
 };
 
+export const getEmail = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select("email");
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado." });
+    }
+
+    res.json({ email: user.email });
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao buscar usuário." });
+  }
+};
+
 export const deleteUser = async (req, res) => {
   const { email } = req.params;
 
