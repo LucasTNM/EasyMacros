@@ -8,13 +8,22 @@ import { Label } from "@/components/ui/label"
 import Link from "next/link"
 import { Utensils } from "lucide-react"
 import { useRouter } from "next/navigation"
+import axios from 'axios';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [senha, setSenha] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
+
+  const apiUser = axios.create({
+    baseURL: 'https://easymacros.onrender.com/api/user',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    withCredentials: true,
+  });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -22,21 +31,12 @@ export default function LoginPage() {
     setError("")
 
     try {
-      // Here you would connect to your backend API
-      // const response = await fetch('your-backend-url/api/login', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ email, password }),
-      // })
+       const response = await apiUser.post(`/login`, { email, senha });
+       
+       if (!response.data) {
+          throw new Error("Erro ao fazer login. ");
+       }
 
-      // if (!response.ok) {
-      //   throw new Error('Login failed')
-      // }
-
-      // const data = await response.json()
-      // localStorage.setItem('token', data.token)
-
-      // Simulate successful login
       setTimeout(() => {
         router.push("/dashboard")
       }, 1000)
@@ -87,8 +87,8 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
                   required
                 />
               </div>

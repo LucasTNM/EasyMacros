@@ -8,58 +8,149 @@ import { Progress } from "@/components/ui/progress"
 import Link from "next/link"
 import { Utensils, User, Settings, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
+import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
 
 export default function DashboardPage() {
   const [userData, setUserData] = useState({
-    name: "John Doe",
-    age: 30,
-    height: 180,
-    weight: 80,
-    gender: "male",
-    activityLevel: "moderate",
-    macros: {
-      calories: 2500,
-      protein: 200,
-      carbs: 250,
-      fat: 83,
+    nome: "",
+    email: "",
+    userInfo: {
+      idade: 0,
+      sexo: "",
+      peso: 0,
+      altura: 0,
+      nivelAtividade: "",
+      objetivo: "",
     },
-  })
+    userMetabolism: {
+      taxaMetabolicaBasal: 0,
+      gastoTotalDiario: 0,
+      consumo: 0,
+      calorias: 0,
+      proteinas: 0,
+      carboidratos: 0,
+      gorduras: 0,
+    },
+    Chat: {
+      dieta: "",
+      ultimaRequisicao: "",
+    }
+  });
 
-  const router = useRouter()
+  const [dietPlan, setDietPlan] = useState<{ title: string; items: string[] }[]>([]);
+
+  const apiUser = axios.create({
+    baseURL: "https://easymacros.onrender.com/api/user",
+    withCredentials: true,
+  });
+
+  const router = useRouter();
 
   useEffect(() => {
-    // Here you would fetch user data from your backend
-    // const fetchUserData = async () => {
-    //   try {
-    //     const token = localStorage.getItem('token')
-    //     if (!token) {
-    //       router.push('/login')
-    //       return
-    //     }
-    //
-    //     const response = await fetch('your-backend-url/api/user', {
-    //       headers: { Authorization: `Bearer ${token}` }
-    //     })
-    //
-    //     if (!response.ok) {
-    //       throw new Error('Failed to fetch user data')
-    //     }
-    //
-    //     const data = await response.json()
-    //     setUserData(data)
-    //   } catch (err) {
-    //     console.error(err)
-    //     router.push('/login')
-    //   }
-    // }
-    //
-    // fetchUserData()
-  }, [router])
+    const fetchUserData = async () => {
+      try {
 
-  const handleLogout = () => {
-    // localStorage.removeItem('token')
-    router.push("/login")
-  }
+        const emailResponse = await apiUser.get(`/email`, { withCredentials: true });
+        const email = emailResponse.data.email;
+
+        if (!email) {
+          router.push('/login');
+        }
+
+        const response = await apiUser.get(`/find/${email}`,);
+
+        if (!response.data) {
+          throw new Error("Failed to fetch user data");
+        }
+
+        const data = response.data;
+
+        if (!data.userInfo || !data.userMetabolism) {
+          throw new Error("Incomplete user data");
+        }
+
+        const dieta = data.Chat.dieta || "Nenhuma dieta disponível no momento.";
+        const processedDiet = processDietResponse(dieta);
+        setDietPlan(processedDiet);
+
+        setUserData({
+          nome: data.nome,
+          email: data.email,
+          userInfo: {
+            idade: data.userInfo.idade,
+            sexo: data.userInfo.sexo,
+            peso: data.userInfo.peso,
+            altura: data.userInfo.altura,
+            nivelAtividade: data.userInfo.nivelAtividade,
+            objetivo: data.userInfo.objetivo,
+          },
+          userMetabolism: {
+            taxaMetabolicaBasal: data.userMetabolism.taxaMetabolicaBasal,
+            gastoTotalDiario: data.userMetabolism.gastoTotalDiario,
+            consumo: data.userMetabolism.consumo,
+            calorias: data.userMetabolism.calorias,
+            proteinas: data.userMetabolism.proteinas,
+            carboidratos: data.userMetabolism.carboidratos,
+            gorduras: data.userMetabolism.gorduras,
+          },
+          Chat: {
+            dieta: data.Chat.dieta,
+            ultimaRequisicao: data.Chat.ultimaRequisicao,
+          },
+        });
+      } catch (err) {
+        console.error(err);
+        router.push("/login");
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleLogout = async () => {
+    await apiUser.post(`/logout`);
+    router.push("/login");
+  };
+
+  const handlePercentage = () => {
+    const { proteinas, carboidratos, gorduras, consumo } = userData.userMetabolism;
+
+    const caloriasProteinas = proteinas * 4;
+    const caloriasCarboidratos = carboidratos * 4;
+    const caloriasGorduras = gorduras * 9;
+
+    const porcentagemProteinas = parseFloat(((caloriasProteinas / consumo) * 100).toFixed(2));
+    const porcentagemCarboidratos = parseFloat(((caloriasCarboidratos / consumo) * 100).toFixed(2));
+    const porcentagemGorduras = parseFloat(((caloriasGorduras / consumo) * 100).toFixed(2));
+
+    return {
+      porcentagemProteinas,
+      porcentagemCarboidratos,
+      porcentagemGorduras,
+    };
+  };
+
+  const { porcentagemProteinas, porcentagemCarboidratos, porcentagemGorduras } = handlePercentage();
+
+  const processDietResponse = (dieta: string) => {
+    const sections = dieta.split(/(?=Café da manhã|Almoço|Lanche|Jantar|Total do dia)/g);
+
+    const dietPlan = sections.map((section) => {
+      const [title, ...items] = section.split(/-\s/).map((item) => item.trim());
+      return {
+        title: title.replace(":", ""),
+        items: items.filter((item) => item),
+      };
+    });
+
+    return dietPlan;
+  };
+
+  const calculateWaterIntake = (peso: number) => {
+    const waterInmililiters = (peso * 35);
+    return waterInmililiters;
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -91,63 +182,63 @@ export default function DashboardPage() {
       </header>
       <main className="flex-1 p-4 md:p-8">
         <div className="container">
-          <h1 className="text-3xl font-bold mb-8">Welcome, {userData.name}</h1>
+          <h1 className="text-3xl font-bold mb-8">Bem vindo, {userData.nome}</h1>
 
           <Tabs defaultValue="macros" className="space-y-8">
             <TabsList>
-              <TabsTrigger value="macros">Macros</TabsTrigger>
-              <TabsTrigger value="diet">Diet Suggestions</TabsTrigger>
-              <TabsTrigger value="profile">Profile</TabsTrigger>
+              <TabsTrigger value="macros">Macronutrientes</TabsTrigger>
+              <TabsTrigger value="diet">Sugestão de dieta</TabsTrigger>
+              <TabsTrigger value="profile">Perfil</TabsTrigger>
             </TabsList>
 
             <TabsContent value="macros" className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="shadow-md">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Daily Calories</CardTitle>
-                    <CardDescription>Target intake</CardDescription>
+                    <CardTitle className="text-lg">Calorias Diarias</CardTitle>
+                    <CardDescription>Meta de calorias</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold">{userData.macros.calories}</div>
+                    <div className="text-3xl font-bold">{userData.userMetabolism.consumo}</div>
                     <p className="text-xs text-muted-foreground">kcal</p>
                   </CardContent>
                 </Card>
                 <Card className="shadow-md">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Protein</CardTitle>
-                    <CardDescription>30% of calories</CardDescription>
+                    <CardTitle className="text-lg">Proteinas</CardTitle>
+                    <CardDescription>{porcentagemProteinas}% das calorias</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <div className="text-3xl font-bold">{userData.macros.protein}g</div>
-                    <Progress value={30} className="h-2" />
+                    <div className="text-3xl font-bold">{userData.userMetabolism.proteinas}g</div>
+                    <Progress value={porcentagemProteinas} className="h-2" />
                   </CardContent>
                 </Card>
                 <Card className="shadow-md">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Carbohydrates</CardTitle>
-                    <CardDescription>40% of calories</CardDescription>
+                    <CardTitle className="text-lg">Carboidratos</CardTitle>
+                    <CardDescription>{porcentagemCarboidratos}% das calorias</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <div className="text-3xl font-bold">{userData.macros.carbs}g</div>
-                    <Progress value={40} className="h-2" />
+                    <div className="text-3xl font-bold">{userData.userMetabolism.carboidratos}g</div>
+                    <Progress value={porcentagemCarboidratos} className="h-2" />
                   </CardContent>
                 </Card>
                 <Card className="shadow-md">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Fat</CardTitle>
-                    <CardDescription>30% of calories</CardDescription>
+                    <CardTitle className="text-lg">Gorduras</CardTitle>
+                    <CardDescription>{porcentagemGorduras}% das calorias</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-2">
-                    <div className="text-3xl font-bold">{userData.macros.fat}g</div>
-                    <Progress value={30} className="h-2" />
+                    <div className="text-3xl font-bold">{userData.userMetabolism.gorduras}g</div>
+                    <Progress value={porcentagemGorduras} className="h-2" />
                   </CardContent>
                 </Card>
               </div>
 
               <Card className="shadow-md mt-6">
                 <CardHeader>
-                  <CardTitle>Macro Breakdown</CardTitle>
-                  <CardDescription>Your personalized macronutrient distribution</CardDescription>
+                  <CardTitle>Tabela de macros</CardTitle>
+                  <CardDescription>Seu controle de macronutrientes</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-8">
@@ -155,31 +246,31 @@ export default function DashboardPage() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="h-4 w-4 rounded-full bg-primary"></div>
-                          <span>Protein</span>
+                          <span>Proteinas</span>
                         </div>
-                        <span className="font-medium">{userData.macros.protein}g (30%)</span>
+                        <span className="font-medium">{userData.userMetabolism.proteinas}g ({porcentagemProteinas}%)</span>
                       </div>
-                      <Progress value={30} className="h-2" />
+                      <Progress value={porcentagemProteinas} className="h-2" />
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="h-4 w-4 rounded-full bg-blue-500"></div>
-                          <span>Carbohydrates</span>
+                          <span>Carboidratos</span>
                         </div>
-                        <span className="font-medium">{userData.macros.carbs}g (40%)</span>
+                        <span className="font-medium">{userData.userMetabolism.carboidratos}g ({porcentagemCarboidratos}%)</span>
                       </div>
-                      <Progress value={40} className="h-2 bg-blue-100" />
+                      <Progress value={porcentagemCarboidratos} className="h-2 bg-blue-100" />
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className="h-4 w-4 rounded-full bg-yellow-500"></div>
-                          <span>Fat</span>
+                          <span>Gorduras</span>
                         </div>
-                        <span className="font-medium">{userData.macros.fat}g (30%)</span>
+                        <span className="font-medium">{userData.userMetabolism.gorduras}g ({porcentagemGorduras}%)</span>
                       </div>
-                      <Progress value={30} className="h-2 bg-yellow-100" />
+                      <Progress value={porcentagemGorduras} className="h-2 bg-yellow-100" />
                     </div>
                   </div>
                 </CardContent>
@@ -189,63 +280,42 @@ export default function DashboardPage() {
             <TabsContent value="diet" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Recommended Diet Plan</CardTitle>
-                  <CardDescription>Based on your macronutrient needs</CardDescription>
+                  <CardTitle>Plano de dieta sugerido</CardTitle>
+                  <CardDescription>Baseado na necessidade dos seus macronutrientes</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Breakfast</h3>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>3 eggs (18g protein, 15g fat)</li>
-                        <li>1 slice whole grain toast (3g protein, 15g carbs, 1g fat)</li>
-                        <li>1 cup Greek yogurt (20g protein, 8g carbs, 0g fat)</li>
-                        <li>1 medium banana (1g protein, 27g carbs, 0g fat)</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Lunch</h3>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>6oz grilled chicken breast (50g protein, 0g carbs, 6g fat)</li>
-                        <li>1 cup brown rice (5g protein, 45g carbs, 2g fat)</li>
-                        <li>2 cups mixed vegetables (4g protein, 20g carbs, 0g fat)</li>
-                        <li>1 tablespoon olive oil (0g protein, 0g carbs, 14g fat)</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Dinner</h3>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>6oz salmon (34g protein, 0g carbs, 14g fat)</li>
-                        <li>1 medium sweet potato (2g protein, 24g carbs, 0g fat)</li>
-                        <li>1 cup steamed broccoli (3g protein, 6g carbs, 0g fat)</li>
-                        <li>1 tablespoon butter (0g protein, 0g carbs, 12g fat)</li>
-                      </ul>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Snacks</h3>
-                      <ul className="list-disc pl-5 space-y-1">
-                        <li>1 protein shake (25g protein, 5g carbs, 2g fat)</li>
-                        <li>1/4 cup mixed nuts (6g protein, 8g carbs, 16g fat)</li>
-                        <li>1 apple with 2 tbsp peanut butter (8g protein, 25g carbs, 16g fat)</li>
-                      </ul>
-                    </div>
+                    {dietPlan.length > 0 ? (
+                      dietPlan.map((section, index) => (
+                        <div key={index}>
+                          <h3 className="text-lg font-medium mb-2">{section.title}</h3>
+                          <ul className="list-disc pl-5 space-y-1">
+                            {section.items.map((item, idx) => (
+                              <li key={idx}>{item}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))
+                    ) : (
+                      <p>Nenhuma dieta disponível no momento.</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Meal Prep Tips</CardTitle>
-                  <CardDescription>Make sticking to your diet easier</CardDescription>
+                  <CardTitle>Dicas para Preparação de Refeições</CardTitle>
+                  <CardDescription>Facilite a adesão à sua dieta</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ul className="list-disc pl-5 space-y-2">
-                    <li>Prepare meals in bulk on weekends to save time during the week</li>
-                    <li>Use a food scale to measure portions accurately</li>
-                    <li>Store meals in portion-controlled containers</li>
-                    <li>Keep healthy snacks readily available to avoid unhealthy choices</li>
-                    <li>Stay hydrated by drinking at least 8 glasses of water daily</li>
-                    <li>Adjust your meal plan based on your activity level each day</li>
+                    <li>Mantenha-se hidratado bebendo pelo menos {calculateWaterIntake(userData.userInfo.peso)} ml de água por dia</li>
+                    <li>Prepare refeições em grande quantidade nos finais de semana para economizar tempo durante a semana</li>
+                    <li>Use uma balança de cozinha para medir as porções com precisão</li>
+                    <li>Armazene as refeições em recipientes com porções controladas</li>
+                    <li>Mantenha lanches saudáveis sempre à mão para evitar escolhas não saudáveis</li>
+                    <li>Ajuste seu plano alimentar com base no seu nível de atividade quando necessário</li>
                   </ul>
                 </CardContent>
               </Card>
@@ -264,15 +334,15 @@ export default function DashboardPage() {
                       <dl className="space-y-2">
                         <div className="flex justify-between">
                           <dt className="text-muted-foreground">Name:</dt>
-                          <dd>{userData.name}</dd>
+                          <dd>{userData.nome}</dd>
                         </div>
                         <div className="flex justify-between">
                           <dt className="text-muted-foreground">Age:</dt>
-                          <dd>{userData.age} years</dd>
+                          <dd>{userData.userInfo.idade} years</dd>
                         </div>
                         <div className="flex justify-between">
                           <dt className="text-muted-foreground">Gender:</dt>
-                          <dd className="capitalize">{userData.gender}</dd>
+                          <dd className="capitalize">{userData.userInfo.sexo}</dd>
                         </div>
                       </dl>
                     </div>
@@ -281,15 +351,15 @@ export default function DashboardPage() {
                       <dl className="space-y-2">
                         <div className="flex justify-between">
                           <dt className="text-muted-foreground">Height:</dt>
-                          <dd>{userData.height} cm</dd>
+                          <dd>{userData.userInfo.altura} cm</dd>
                         </div>
                         <div className="flex justify-between">
                           <dt className="text-muted-foreground">Weight:</dt>
-                          <dd>{userData.weight} kg</dd>
+                          <dd>{userData.userInfo.peso} kg</dd>
                         </div>
                         <div className="flex justify-between">
                           <dt className="text-muted-foreground">Activity Level:</dt>
-                          <dd className="capitalize">{userData.activityLevel.replace(/([A-Z])/g, " $1").trim()}</dd>
+                          <dd className="capitalize">{userData.userInfo.nivelAtividade.replace(/([A-Z])/g, " $1").trim()}</dd>
                         </div>
                       </dl>
                     </div>

@@ -9,19 +9,31 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import Link from "next/link"
 import { Utensils } from "lucide-react"
 import { useRouter } from "next/navigation"
+import axios from 'axios';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
-    name: "",
+    nome: "",
     email: "",
-    password: "",
-    confirmPassword: "",
-    age: "",
-    height: "",
-    weight: "",
-    gender: "male",
-    activityLevel: "moderate",
+    senha: "",
+    confirmarSenha: "",
+    idade: "",
+    altura: "",
+    peso: "",
+    sexo: "Masculino",
+    objetivo: "Emagrecimento",
+    nivelAtividade: "Moderado",
+    calorias: 0,
   })
+
+  const apiUser = axios.create({
+    baseURL: 'https://easymacros.onrender.com/api',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    withCredentials: true,
+  });
+
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const router = useRouter()
@@ -36,35 +48,34 @@ export default function RegisterPage() {
     setIsLoading(true)
     setError("")
   
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
+    if (formData.senha !== formData.confirmarSenha) {
+      setError("As senhas não coincidem")
       setIsLoading(false)
       return
     }
 
     try {
-      // Here you would connect to your backend API
-      // const response = await fetch('your-backend-url/api/register', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(formData),
-      // })
+      const response = await apiUser.post('/user/register', formData);
 
-      // if (!response.ok) {
-      //   throw new Error('Registration failed')
-      // }
+      if (response.data) {
+        const tmbResponse = await apiUser.post(`user/tmbCalculator/${formData.email}`);
+        if (!tmbResponse.data) throw new Error("Erro ao calcular TMB.");
+    
+        const macrosResponse = await apiUser.post(`/user/macros/${formData.email}`, { calorias: formData.calorias });
+        if (!macrosResponse.data) throw new Error("Erro ao calcular macros.");
+    
+        const dietResponse = await apiUser.post(`/chat/generateDiet/${formData.email}`);
+        if (!dietResponse.data) throw new Error("Erro ao gerar dieta.");
+      }
 
-      // const data = await response.json()
-      // localStorage.setItem('token', data.token)
-
-      // Simulate successful registration
       setTimeout(() => {
-        router.push("/dashboard")
-      }, 1000)
+        router.push("/dashboard");
+      }, 1000);
     } catch (err) {
-      setError("Registration failed. Please try again.")
+      console.log(err);
+      setError("Falha no registro. Por favor, tente novamente.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -81,54 +92,54 @@ export default function RegisterPage() {
       <main className="flex-1 flex items-center justify-center p-4 py-8">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl">Create an Account</CardTitle>
-            <CardDescription>Enter your details to get started with EasyMacros</CardDescription>
+            <CardTitle className="text-2xl">Criar uma Conta</CardTitle>
+            <CardDescription>Insira seus dados para começar com EasyMacros</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               {error && <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">{error}</div>}
               <div className="space-y-2">
-                <Label htmlFor="name">Full Name</Label>
-                <Input id="name" name="name" value={formData.name} onChange={handleChange} required />
+                <Label htmlFor="name">Nome Completo</Label>
+                <Input id="name" name="nome" value={formData.nome} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Senha</Label>
                 <Input
                   id="password"
-                  name="password"
+                  name="senha"
                   type="password"
-                  value={formData.password}
+                  value={formData.senha}
                   onChange={handleChange}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Label htmlFor="confirmPassword">Confirmar Senha</Label>
                 <Input
                   id="confirmPassword"
-                  name="confirmPassword"
+                  name="confirmarSenha"
                   type="password"
-                  value={formData.confirmPassword}
+                  value={formData.confirmarSenha}
                   onChange={handleChange}
                   required
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="age">Age</Label>
-                  <Input id="age" name="age" type="number" value={formData.age} onChange={handleChange} required />
+                  <Label htmlFor="age">Idade</Label>
+                  <Input id="age" name="idade" type="number" value={formData.idade} onChange={handleChange} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="height">Height (cm)</Label>
+                  <Label htmlFor="height">Altura (cm)</Label>
                   <Input
                     id="height"
-                    name="height"
+                    name="altura"
                     type="number"
-                    value={formData.height}
+                    value={formData.altura}
                     onChange={handleChange}
                     required
                   />
@@ -136,72 +147,107 @@ export default function RegisterPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Label htmlFor="weight">Peso (kg)</Label>
                   <Input
                     id="weight"
-                    name="weight"
+                    name="peso"
                     type="number"
-                    value={formData.weight}
+                    value={formData.peso}
                     onChange={handleChange}
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Gender</Label>
+                  <Label>Gênero</Label>
                   <RadioGroup
-                    name="gender"
-                    value={formData.gender}
-                    onValueChange={(value) => setFormData((prev) => ({ ...prev, gender: value }))}
+                    name="sexo"
+                    value={formData.sexo}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, sexo: value }))}
                     className="flex gap-4"
                   >
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="male" id="male" />
-                      <Label htmlFor="male">Male</Label>
+                      <RadioGroupItem value="Masculino" id="male" />
+                      <Label htmlFor="male">Masculino</Label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="female" id="female" />
-                      <Label htmlFor="female">Female</Label>
+                      <RadioGroupItem value="Feminino" id="female" />
+                      <Label htmlFor="female">Feminino</Label>
                     </div>
                   </RadioGroup>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Activity Level</Label>
+                <Label>Objetivo</Label>
                 <RadioGroup
-                  name="activityLevel"
-                  value={formData.activityLevel}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, activityLevel: value }))}
+                  name="goal"
+                  value={formData.objetivo}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, objetivo: value }))}
                   className="grid grid-cols-1 gap-2"
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="sedentary" id="sedentary" />
-                    <Label htmlFor="sedentary">Sedentary (little or no exercise)</Label>
+                    <RadioGroupItem value="Emagrecimento" id="emagrecimento" />
+                    <Label htmlFor="emagrecimento">Emagrecimento</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="light" id="light" />
-                    <Label htmlFor="light">Light (exercise 1-3 days/week)</Label>
+                    <RadioGroupItem value="Manutenção" id="manutencao" />
+                    <Label htmlFor="manutencao">Manutenção</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="moderate" id="moderate" />
-                    <Label htmlFor="moderate">Moderate (exercise 3-5 days/week)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="active" id="active" />
-                    <Label htmlFor="active">Active (exercise 6-7 days/week)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="veryActive" id="veryActive" />
-                    <Label htmlFor="veryActive">Very Active (hard exercise daily)</Label>
+                    <RadioGroupItem value="Ganho de massa" id="ganho" />
+                    <Label htmlFor="ganho">Ganho de massa</Label>
                   </div>
                 </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <Label>Nível de Atividade</Label>
+                <RadioGroup
+                  name="activityLevel"
+                  value={formData.nivelAtividade}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, nivelAtividade: value }))}
+                  className="grid grid-cols-1 gap-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Sedentário" id="sedentary" />
+                    <Label htmlFor="sedentary">Sedentário (pouco ou nenhum exercício)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Leve" id="light" />
+                    <Label htmlFor="light">Leve (exercício 1-3 dias/semana)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Moderado" id="moderate" />
+                    <Label htmlFor="moderate">Moderado (exercício 3-5 dias/semana)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Ativo" id="active" />
+                    <Label htmlFor="active">Ativo (exercício 6-7 dias/semana)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="Muito ativo" id="veryActive" />
+                    <Label htmlFor="veryActive">Muito Ativo (exercício intenso diário)</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="caloriasObjetivo">
+                  Quantidade de calorias para ganho ou perda (se não tiver um número em mente, nós te ajudaremos!)
+                  </Label>
+                <Input
+                  id="calorias"
+                  name="calorias"
+                  type="number"
+                  value={formData.calorias}
+                  onChange={handleChange}
+                  placeholder="0"
+                />
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Creating Account..." : "Register"}
+                {isLoading ? "Criando Conta..." : "Registrar"}
               </Button>
               <div className="text-center text-sm">
-                Already have an account?{" "}
+                Já tem uma conta?{" "}
                 <Link href="/login" className="text-primary hover:underline">
                   Login
                 </Link>
