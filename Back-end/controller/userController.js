@@ -58,13 +58,16 @@ export const registerUser = async (req, res) => {
 
     await userInfo.save();
 
-    const token = jwt.sign(
-      { _id: createdUser._id, email: createdUser.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
-    res.cookie("token", token, { maxAge: 3600000, httpOnly: true });
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 3600000,
+    });
 
     res.status(201).json({
       _id: createdUser._id,
@@ -184,7 +187,10 @@ export const getUser = async (req, res) => {
 
 export const getEmail = async (req, res) => {
   try {
-    console.log("ID do usuário recebido no middleware:", req.user._id);
+
+    if (!req.user._id) {
+      return res.status(400).json({ message: "ID do usuário inválido." });
+    }
 
     const user = await User.findById(req.user._id).select("email");
 
@@ -193,7 +199,6 @@ export const getEmail = async (req, res) => {
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
-    console.log("Email encontrado:", user.email);
     res.json({ email: user.email });
   } catch (error) {
     console.error("Erro ao buscar o email do usuário:", error);
@@ -221,32 +226,49 @@ export const deleteUser = async (req, res) => {
 };
 
 export const Login = async (req, res) => {
-  const { email, senha } = req.body;
-
-  const hasAccount = await User.findOne({ email });
-
-  if (!hasAccount) {
-    return res.status(500).json({ message: "Usuário não encontrado." });
-  }
-
   try {
-    const isPasswordCorrect = await bcrypt.compare(senha, hasAccount.senha);
+    const { email, senha } = req.body;
+    const user = await User.findOne({ email });
 
-    if (!isPasswordCorrect) {
-      return res.status(500).json({ message: "Senha incorreta." });
-    } else {
-      const token = jwt.sign(
-        { _id: hasAccount._id, email: hasAccount.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "1h" }
-      );
-
-      res.cookie("token", token, { maxAge: 3600000, httpOnly: true });
-
-      return res.status(200).json({ message: "login feito com sucesso." });
+    if (!user) {
+      return res.status(401).json({ message: "Usuário não encontrado" });
     }
-  } catch (err) {
-    res.status(500).json({ message: "Erro ao fazer login." + err });
+
+    const senhaCorreta = await bcrypt.compare(senha, user.senha);
+
+    if (!senhaCorreta) {
+      return res.status(401).json({ message: "Credenciais inválidas" });
+    }
+
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 3600000,
+    });
+
+    res.json({ message: "Login bem-sucedido" });
+  } catch (error) {
+    console.error("Erro no login:", error);
+    res.status(500).json({ message: "Erro interno do servidor" });
+  }
+};
+
+export const logout = (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+    });
+    res.status(200).json({ message: "Logout realizado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao fazer logout:", error);
+    res.status(500).json({ message: "Erro ao fazer logout." });
   }
 };
 
