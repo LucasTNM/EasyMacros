@@ -184,12 +184,16 @@ export const getUser = async (req, res) => {
 
 export const getEmail = async (req, res) => {
   try {
+    console.log("ID do usuário recebido no middleware:", req.user._id);
+
     const user = await User.findById(req.user._id).select("email");
 
     if (!user) {
+      console.error("Usuário não encontrado.");
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
+    console.log("Email encontrado:", user.email);
     res.json({ email: user.email });
   } catch (error) {
     console.error("Erro ao buscar o email do usuário:", error);
