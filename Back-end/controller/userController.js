@@ -192,7 +192,8 @@ export const getEmail = async (req, res) => {
 
     res.json({ email: user.email });
   } catch (error) {
-    res.status(500).json({ message: "Erro ao buscar usuário." });
+    console.error("Erro ao buscar o email do usuário:", error);
+    res.status(500).json({ message: "Erro ao buscar o email do usuário." });
   }
 };
 
