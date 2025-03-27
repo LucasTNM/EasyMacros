@@ -137,9 +137,9 @@ export const tmbCalculator = async (req, res) => {
         const activityLevels = {
           "Sedentário": { proteinas: 1.2, gorduras: 0.3 },
           "Leve": { proteinas: 1.5, gorduras: 0.28 },
-          "Moderado": { proteinas: 1.8, gorduras: 0.25 },
-          "Ativo": { proteinas: 2.0, gorduras: 0.22 },
-          "Muito ativo": { proteinas: 2.2, gorduras: 0.20 },
+          "Moderado": { proteinas: 2.0, gorduras: 0.25 },
+          "Ativo": { proteinas: 2.2, gorduras: 0.22 },
+          "Muito ativo": { proteinas: 2.4, gorduras: 0.20 },
         };
   
         const { proteinas: proteinFactor, gorduras: fatFactor } = activityLevels[nivelAtividade] || { proteinas: 0, gorduras: 0 };

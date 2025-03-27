@@ -42,13 +42,16 @@ export const GenerateDiet = async (req, res) => {
       }
     }
 
-    const prompt = `Você é um nutricionista. Crie uma dieta diária personalizada para uma pessoa com as seguintes necessidades:
+    const prompt = `Crie uma dieta diária personalizada para uma pessoa com as seguintes necessidades:
+- Gênero: ${userInfo.sexo}
 - Proteínas: ${metabolism.proteinas}g
 - Carboidratos: ${metabolism.carboidratos}g
 - Gorduras: ${metabolism.gorduras}g
 - Calorias: ${metabolism.consumo} kcal
 
-A dieta deve conter café da manhã, almoço, lanche e jantar. Escreva em português.`;
+A dieta deve conter café da manhã, almoço, lanche e jantar. 
+Liste apenas os alimentos e suas quantidades, sem introduções ou explicações adicionais. 
+O texto deve estar em português.`;
 
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
