@@ -2,6 +2,7 @@ import User from "../models/user.js";
 import UserInfo from "../models/userInfo.js";
 import UserMetabolism from "../models/userMetabolism.js";
 import Chat from "../models/chat.js";
+import { generateTokenAndSetCookie, clearAuthCookie } from "../utils/auth.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
@@ -58,16 +59,7 @@ export const registerUser = async (req, res) => {
 
     await userInfo.save();
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 3600000,
-    });
+    generateTokenAndSetCookie(res, user._id);
 
     res.status(201).json({
       _id: createdUser._id,
@@ -240,16 +232,7 @@ export const Login = async (req, res) => {
       return res.status(401).json({ message: "Credenciais inválidas" });
     }
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 3600000,
-    });
+    generateTokenAndSetCookie(res, user._id);
 
     res.json({ message: "Login bem-sucedido" });
   } catch (error) {
@@ -260,11 +243,9 @@ export const Login = async (req, res) => {
 
 export const logout = (req, res) => {
   try {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "lax",
-    });
+
+    clearAuthCookie(res);
+
     res.status(200).json({ message: "Logout realizado com sucesso." });
   } catch (error) {
     console.error("Erro ao fazer logout:", error);
@@ -369,7 +350,7 @@ export const verifyResetCode = async (req, res) => {
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
 
-    if (!user.dataRedefinicao) {
+    if (!user.codigoRedefinicao) {
       return res.status(400).json({ message: "Código de redefinição não solicitado." });
     }
 
@@ -380,16 +361,16 @@ export const verifyResetCode = async (req, res) => {
       return res.status(400).json({ message: "Tempo de redefinição de senha expirou, solicite um novo código." });
     }
 
-    if (user.codigoRedefinicao.toString().trim() !== code.toString().trim()) {
+    if (String(user.codigoRedefinicao).trim() !== String(code).trim()) {
       return res.status(400).json({ message: "Código de redefinição incorreto." });
     }
 
     user.codigoRedefinicao = undefined;
     await user.save();
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    return res.status(200).json({ message: "Código verificado com sucesso.", token });
+    generateTokenAndSetCookie(res, user._id);
 
+    return res.status(200).json({ message: "Código verificado com sucesso." });
   } catch (err) {
     console.error("Erro ao verificar código:", err.message);
     res.status(500).json({ message: "Não foi possível verificar o código." });
@@ -397,33 +378,33 @@ export const verifyResetCode = async (req, res) => {
 };
 
 export const createNewPassword = async (req, res) => {
-  const { token } = req.params;
-  const { password } = req.body;
+  const { email, senha } = req.body;
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findOne({ _id: decoded._id });
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(404).json({ message: "Usuário não encontrado." });
     }
-
+    
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
-    if (!passwordRegex.test(password)) {
+    if (!passwordRegex.test(senha)) {
       return res.status(400).json({
         message: "A senha deve ter no mínimo 8 caracteres, incluindo uma letra maiúscula, um número e um símbolo especial."
       });
     }
 
-    const isEqual = await bcrypt.compare(password, user.senha);
+    const isEqual = await bcrypt.compare(senha, user.senha);
     if (isEqual) {
       return res.status(400).json({ message: "Sua nova senha não pode ser igual à anterior." });
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(senha, salt);
     user.senha = hashedPassword;
     await user.save();
+
+    clearAuthCookie(res);
 
     return res.status(200).json({ message: "Senha atualizada com sucesso." });
 
