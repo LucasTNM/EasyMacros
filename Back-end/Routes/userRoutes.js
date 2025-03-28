@@ -16,6 +16,6 @@ router.post('/macros/:email', verifyToken, metabolismController.macrosCalculator
 router.post('/update/:email', verifyToken, userController.updateUser);
 router.post('/sendResetCode', userController.sendResetCode);
 router.post('/verifyResetCode', userController.verifyResetCode);
-router.post('/createNewPassword/:token', userController.createNewPassword);
+router.post('/createNewPassword', verifyToken, userController.createNewPassword);
 
 export default router;
