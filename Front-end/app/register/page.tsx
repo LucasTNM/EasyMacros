@@ -10,6 +10,7 @@ import Link from "next/link"
 import { Utensils } from "lucide-react"
 import { useRouter } from "next/navigation"
 import axios from 'axios';
+import ThemeToggleButton from "@/components/theme-toggle-button"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -87,6 +88,7 @@ export default function RegisterPage() {
             <Utensils className="h-6 w-6" />
             <span className="text-xl font-bold">EasyMacros</span>
           </Link>
+          <ThemeToggleButton />
         </div>
       </header>
       <main className="flex-1 flex items-center justify-center p-4 py-8">
@@ -99,7 +101,7 @@ export default function RegisterPage() {
             <CardContent className="space-y-4">
               {error && <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm">{error}</div>}
               <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
+                <Label htmlFor="name">Nome</Label>
                 <Input id="name" name="nome" value={formData.nome} onChange={handleChange} required />
               </div>
               <div className="space-y-2">

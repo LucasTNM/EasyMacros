@@ -9,7 +9,7 @@ import Link from "next/link"
 import { Utensils, User, Settings, LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import axios from 'axios';
-import { jwtDecode } from "jwt-decode";
+import ThemeToggleButton from "@/components/theme-toggle-button"
 
 export default function DashboardPage() {
   const [userData, setUserData] = useState({
@@ -110,7 +110,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     await apiUser.post(`/logout`);
-    router.push("/login");
+    router.push("/");
   };
 
   const handlePercentage = () => {
@@ -156,21 +156,16 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col">
       <header className="border-b">
         <div className="container flex h-16 items-center justify-between py-4">
-          <Link href="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Utensils className="h-6 w-6" />
             <span className="text-xl font-bold">EasyMacros</span>
-          </Link>
+          </div>
           <div className="flex items-center gap-4">
-            <Link href="/dashboard/profile">
+            <ThemeToggleButton />
+            <Link href="/dashboard/profile/edit">
               <Button variant="ghost" size="icon">
                 <User className="h-5 w-5" />
                 <span className="sr-only">Profile</span>
-              </Button>
-            </Link>
-            <Link href="/dashboard/settings">
-              <Button variant="ghost" size="icon">
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
               </Button>
             </Link>
             <Button variant="ghost" size="icon" onClick={handleLogout}>
@@ -324,41 +319,41 @@ export default function DashboardPage() {
             <TabsContent value="profile" className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Your Profile</CardTitle>
-                  <CardDescription>Your current metrics and settings</CardDescription>
+                  <CardTitle>Perfil</CardTitle>
+                  <CardDescription>Seus dados atuais</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div>
-                      <h3 className="font-medium mb-2">Personal Information</h3>
+                      <h3 className="font-medium mb-2">Informações pessoais</h3>
                       <dl className="space-y-2">
                         <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Name:</dt>
+                          <dt className="text-muted-foreground">Nome:</dt>
                           <dd>{userData.nome}</dd>
                         </div>
                         <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Age:</dt>
-                          <dd>{userData.userInfo.idade} years</dd>
+                          <dt className="text-muted-foreground">Idade:</dt>
+                          <dd>{userData.userInfo.idade} anos</dd>
                         </div>
                         <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Gender:</dt>
+                          <dt className="text-muted-foreground">Gênero:</dt>
                           <dd className="capitalize">{userData.userInfo.sexo}</dd>
                         </div>
                       </dl>
                     </div>
                     <div>
-                      <h3 className="font-medium mb-2">Body Metrics</h3>
+                      <h3 className="font-medium mb-2">Medidas do corpo</h3>
                       <dl className="space-y-2">
                         <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Height:</dt>
+                          <dt className="text-muted-foreground">Altura:</dt>
                           <dd>{userData.userInfo.altura} cm</dd>
                         </div>
                         <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Weight:</dt>
+                          <dt className="text-muted-foreground">Peso:</dt>
                           <dd>{userData.userInfo.peso} kg</dd>
                         </div>
                         <div className="flex justify-between">
-                          <dt className="text-muted-foreground">Activity Level:</dt>
+                          <dt className="text-muted-foreground">Nível de atividade:</dt>
                           <dd className="capitalize">{userData.userInfo.nivelAtividade.replace(/([A-Z])/g, " $1").trim()}</dd>
                         </div>
                       </dl>
@@ -366,7 +361,7 @@ export default function DashboardPage() {
                   </div>
                   <div className="mt-6">
                     <Link href="/dashboard/profile/edit">
-                      <Button>Edit Profile</Button>
+                      <Button>Editar Perfil</Button>
                     </Link>
                   </div>
                 </CardContent>
