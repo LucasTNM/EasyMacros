@@ -9,6 +9,7 @@ import Link from "next/link"
 import { Utensils } from "lucide-react"
 import { useRouter } from "next/navigation"
 import axios from 'axios';
+import ThemeToggleButton from "@/components/theme-toggle-button"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -41,7 +42,7 @@ export default function LoginPage() {
         router.push("/dashboard")
       }, 1000)
     } catch (err) {
-      setError("Invalid email or password. Please try again.")
+      setError("Senha ou email inválido. Por favor, Tente novamente.")
     } finally {
       setIsLoading(false)
     }
@@ -55,13 +56,14 @@ export default function LoginPage() {
             <Utensils className="h-6 w-6" />
             <span className="text-xl font-bold">EasyMacros</span>
           </Link>
+          <ThemeToggleButton />
         </div>
       </header>
       <main className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
             <CardTitle className="text-2xl">Login</CardTitle>
-            <CardDescription>Enter your credentials to access your account</CardDescription>
+            <CardDescription>Entre com seus dados para efetuar o login</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
@@ -79,9 +81,9 @@ export default function LoginPage() {
               </div>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Senha</Label>
                   <Link href="/forgot-password" className="text-sm text-primary hover:underline">
-                    Forgot password?
+                    Esqueceu sua senha?
                   </Link>
                 </div>
                 <Input
@@ -95,12 +97,12 @@ export default function LoginPage() {
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Entrando na conta..." : "Login"}
               </Button>
               <div className="text-center text-sm">
-                Don&apos;t have an account?{" "}
+                Não possui uma conta?{" "}
                 <Link href="/register" className="text-primary hover:underline">
-                  Register
+                  Registrar
                 </Link>
               </div>
             </CardFooter>

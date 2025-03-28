@@ -51,7 +51,6 @@ module.exports = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Add custom background colors
         page: {
           light: "#f5f7fa",
           dark: "#121212",

@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowRight, Calculator, Utensils, User } from "lucide-react"
+import ThemeToggleButton from "@/components/theme-toggle-button"
 
 export default function Home() {
   return (
@@ -14,22 +15,23 @@ export default function Home() {
           </div>
           <nav className="hidden md:flex gap-6">
             <Link href="/" className="text-sm font-medium">
-              Home
+              Início
             </Link>
             <Link href="#features" className="text-sm font-medium">
-              Features
+              Funcionalidades
             </Link>
             <Link href="#about" className="text-sm font-medium">
-              About
+              Sobre
             </Link>
           </nav>
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button variant="outline">Login</Button>
+              <Button variant="outline">Entrar</Button>
             </Link>
             <Link href="/register">
-              <Button>Register</Button>
+              <Button>Registrar</Button>
             </Link>
+            <ThemeToggleButton />
           </div>
         </div>
       </header>
@@ -39,18 +41,18 @@ export default function Home() {
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
                 <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
-                  Calculate Your Macros, Transform Your Health
+                  Calcule Seus Macros, Transforme Sua Saúde
                 </h1>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Personalized nutrition plans based on your body metrics. Start your journey to better health today.
+                  Planos de nutrição personalizados com base nas métricas do seu corpo. Comece sua jornada para uma saúde melhor hoje.
                 </p>
               </div>
               <div className="space-x-4">
                 <Link href="/register">
-                  <Button className="px-8">Get Started</Button>
+                  <Button className="px-8">Começar</Button>
                 </Link>
                 <Link href="#features">
-                  <Button variant="outline">Learn More</Button>
+                  <Button variant="outline">Saiba Mais</Button>
                 </Link>
               </div>
             </div>
@@ -61,43 +63,43 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Features</h2>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Funcionalidades</h2>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Everything you need to track and optimize your nutrition
+                  Tudo o que você precisa para acompanhar e otimizar sua nutrição
                 </p>
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8 mt-8">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium">Personalized Macros</CardTitle>
+                  <CardTitle className="text-lg font-medium">Macros Personalizados</CardTitle>
                   <Calculator className="h-5 w-5 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-500">
-                    Get precise macro calculations based on your age, height, weight, and activity level.
+                    Obtenha cálculos precisos de macros com base na sua idade, altura, peso e nível de atividade.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium">Custom Diet Plans</CardTitle>
+                  <CardTitle className="text-lg font-medium">Planos de Dieta Personalizados</CardTitle>
                   <Utensils className="h-5 w-5 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-500">
-                    Receive tailored meal suggestions that match your macro requirements and food preferences.
+                    Receba sugestões de refeições adaptadas às suas necessidades de macros e preferências alimentares.
                   </p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-lg font-medium">Progress Tracking</CardTitle>
+                  <CardTitle className="text-lg font-medium">Acompanhamento de Progresso</CardTitle>
                   <User className="h-5 w-5 text-primary" />
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-gray-500">
-                    Monitor your progress over time and adjust your nutrition plan as your body changes.
+                    Monitore seu progresso ao longo do tempo e ajuste seu plano de nutrição conforme seu corpo muda.
                   </p>
                 </CardContent>
               </Card>
@@ -109,37 +111,37 @@ export default function Home() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">How It Works</h2>
+                <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Como Funciona</h2>
                 <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl">
-                  Three simple steps to optimize your nutrition
+                  Três passos simples para otimizar sua nutrição
                 </p>
               </div>
             </div>
             <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3 lg:gap-8 mt-8">
               <div className="flex flex-col items-center space-y-2 border rounded-lg p-6">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white">1</div>
-                <h3 className="text-xl font-bold">Create an Account</h3>
-                <p className="text-center text-gray-500">Register and provide your basic information to get started.</p>
+                <h3 className="text-xl font-bold">Crie uma Conta</h3>
+                <p className="text-center text-gray-500">Registre-se e forneça suas informações básicas para começar.</p>
               </div>
               <div className="flex flex-col items-center space-y-2 border rounded-lg p-6">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white">2</div>
-                <h3 className="text-xl font-bold">Enter Your Metrics</h3>
+                <h3 className="text-xl font-bold">Insira Suas Métricas</h3>
                 <p className="text-center text-gray-500">
-                  Input your age, height, weight, and activity level for accurate calculations.
+                  Insira sua idade, altura, peso e nível de atividade para cálculos precisos.
                 </p>
               </div>
               <div className="flex flex-col items-center space-y-2 border rounded-lg p-6">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white">3</div>
-                <h3 className="text-xl font-bold">Get Your Plan</h3>
+                <h3 className="text-xl font-bold">Obtenha Seu Plano</h3>
                 <p className="text-center text-gray-500">
-                  Receive your personalized macro breakdown and diet suggestions.
+                  Receba sua divisão personalizada de macros e sugestões de dieta.
                 </p>
               </div>
             </div>
             <div className="flex justify-center mt-8">
               <Link href="/register">
                 <Button className="px-8">
-                  Start Now <ArrowRight className="ml-2 h-4 w-4" />
+                  Comece Agora <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -149,14 +151,14 @@ export default function Home() {
       <footer className="border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
           <p className="text-center text-sm leading-loose text-gray-500 md:text-left">
-            © 2024 EasyMacros. All rights reserved.
+            © 2024 EasyMacros. Todos os direitos reservados.
           </p>
           <div className="flex items-center gap-4">
             <Link href="/terms" className="text-sm text-gray-500 underline-offset-4 hover:underline">
-              Terms
+              Termos
             </Link>
             <Link href="/privacy" className="text-sm text-gray-500 underline-offset-4 hover:underline">
-              Privacy
+              Privacidade
             </Link>
           </div>
         </div>
