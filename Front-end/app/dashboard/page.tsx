@@ -39,9 +39,10 @@ export default function DashboardPage() {
   });
 
   const [dietPlan, setDietPlan] = useState<{ title: string; items: string[] }[]>([]);
+  const [generateDietError, setGenerateDietError] = useState("");
 
   const apiUser = axios.create({
-    baseURL: "https://easymacros.onrender.com/api/user",
+    baseURL: "https://easymacros.onrender.com/api",
     withCredentials: true,
   });
 
@@ -51,14 +52,14 @@ export default function DashboardPage() {
     const fetchUserData = async () => {
       try {
 
-        const emailResponse = await apiUser.get(`/email`, { withCredentials: true });
+        const emailResponse = await apiUser.get(`/user/email`, { withCredentials: true });
         const email = emailResponse.data.email;
 
         if (!email) {
           router.push('/login');
         }
 
-        const response = await apiUser.get(`/find/${email}`,);
+        const response = await apiUser.get(`/user/find/${email}`,);
 
         if (!response.data) {
           throw new Error("Failed to fetch user data");
@@ -109,7 +110,7 @@ export default function DashboardPage() {
   }, []);
 
   const handleLogout = async () => {
-    await apiUser.post(`/logout`);
+    await apiUser.post(`/user/logout`);
     router.push("/");
   };
 
@@ -152,6 +153,51 @@ export default function DashboardPage() {
     return waterInmililiters;
   };
 
+  const gainOrLoss = () => {
+    const decider = userData.userInfo.objetivo;
+    if (decider === "Emagrecimento") {
+      return "retiradas";
+    } else if (decider === "Ganho de massa") {
+      return "Adicionais";
+    }
+    return "retiradas";
+  };
+
+  const getNextAvailableDate = (ultimaRequisicao: string) => {
+    const lastRequestDate = new Date(ultimaRequisicao);
+    const nextAvailableDate = new Date(lastRequestDate);
+    nextAvailableDate.setDate(lastRequestDate.getDate() + 7);
+    return nextAvailableDate.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const handleGenerateDiet = async () => {
+    try {
+      const email = userData.email;
+      const response = await apiUser.post(`/chat/generateDiet/${email}`);
+
+      if (!response) {
+        const nextAvailableDate = getNextAvailableDate(userData.Chat.ultimaRequisicao);
+        throw new Error(`A nova dieta só poderá ser gerada a partir de: ${nextAvailableDate}`);
+      }
+
+      const dieta = response.data.dieta || "Nenhuma dieta disponível no momento.";
+      const processedDiet = processDietResponse(dieta);
+      setDietPlan(processedDiet);
+      setGenerateDietError("");
+    } catch (err: any) {
+      if (err.response?.status === 429) {
+        const nextAvailableDate = getNextAvailableDate(userData.Chat.ultimaRequisicao);
+        setGenerateDietError(`Limite semanal atingido. Tente novamente em: ${nextAvailableDate}`);
+      } else {
+        setGenerateDietError("Erro ao gerar nova dieta. Por favor, tente novamente mais tarde.");
+      }
+    }
+  };
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b">
@@ -190,7 +236,37 @@ export default function DashboardPage() {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card className="shadow-md">
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Calorias Diarias</CardTitle>
+                    <CardTitle className="text-lg">Gasto total</CardTitle>
+                    <CardDescription>Quantidade de calorias gastas diariamente</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{userData.userMetabolism.gastoTotalDiario}</div>
+                    <p className="text-xs text-muted-foreground">kcal</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-md">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">TMB</CardTitle>
+                    <CardDescription>Taxa Metabólica basal estimada</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{userData.userMetabolism.taxaMetabolicaBasal}</div>
+                    <p className="text-xs text-muted-foreground">kcal</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-md">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Calorias</CardTitle>
+                    <CardDescription>Calorias {gainOrLoss()}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{userData.userMetabolism.calorias}</div>
+                    <p className="text-xs text-muted-foreground">kcal</p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-md">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Consumo diário</CardTitle>
                     <CardDescription>Meta de calorias</CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -294,6 +370,14 @@ export default function DashboardPage() {
                     ) : (
                       <p>Nenhuma dieta disponível no momento.</p>
                     )}
+                    {generateDietError && (
+                      <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm mt-4">
+                        {generateDietError}
+                      </div>
+                    )}
+                    <Button className="mt-4" onClick={handleGenerateDiet}>
+                      Solicitar nova dieta
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

@@ -131,8 +131,6 @@ export const tmbCalculator = async (req, res) => {
         }
       }
   
-      console.log(`Gasto Total Diário Ajustado: ${gastoTotalDiario}`);
-  
       const macrosCalc = (gastoTotalDiario, peso, nivelAtividade) => {
         const activityLevels = {
           "Sedentário": { proteinas: 1.2, gorduras: 0.3 },
@@ -155,7 +153,12 @@ export const tmbCalculator = async (req, res) => {
 
       const consumoTotal = gastoTotalDiario;
   
-      await UserMetabolism.updateOne({ userId: user._id }, { proteinas, carboidratos, gorduras, consumo: consumoTotal});
+      const updateResult = await UserMetabolism.updateOne({ userId: user._id }, { proteinas, carboidratos, gorduras, 
+        consumo: consumoTotal, calorias });
+
+        if (updateResult.modifiedCount === 0) {
+          return res.status(500).json({ message: "Erro ao atualizar o metabolismo do usuário." });
+        }
   
       return res.status(200).json({
         message: "Cálculo de macros feito com sucesso.",
