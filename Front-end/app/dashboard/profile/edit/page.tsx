@@ -103,8 +103,11 @@ export default function EditProfilePage() {
         router.push("/dashboard");
       }, 2000);
     } catch (err) {
-      console.error(err);
-      setError("Falha ao fazer mudanças. Por favor, tente novamente.");
+      if (axios.isAxiosError(err) && err.response?.status === 500) {
+        setError("O déficit de calorias deve ser menor. Por favor, ajuste o valor.");
+      } else {
+        console.error("Erro ao salvar mudanças:", err);
+      }
     } finally {
       setIsLoading(false);
     }

@@ -71,7 +71,15 @@ export default function DashboardPage() {
           throw new Error("Incomplete user data");
         }
 
-        const dieta = data.Chat.dieta || "Nenhuma dieta disponível no momento.";
+        const dieta = data.Chat?.dieta || `
+        Atenção: Esta dieta não é personalizada, tente gerar a dieta novamente mais tarde.
+        Causa: o uso de tokens da api do openRouter chegou ao seu limite.
+        Café da manhã: 2 ovos cozidos, 1 fatia de pão integral, 1 banana.
+        Almoço: 100g de peito de frango grelhado, 1/2 xícara de arroz integral, salada de folhas verdes com azeite.
+        Lanche: 1 iogurte natural, 10 amêndoas.
+        Jantar: 1 omelete com 2 ovos e vegetais, 1 fatia de pão integral.
+      `;
+
         const processedDiet = processDietResponse(dieta);
         setDietPlan(processedDiet);
 
@@ -96,8 +104,15 @@ export default function DashboardPage() {
             gorduras: data.userMetabolism.gorduras,
           },
           Chat: {
-            dieta: data.Chat.dieta,
-            ultimaRequisicao: data.Chat.ultimaRequisicao,
+            dieta: data.Chat?.dieta || `
+              Atenção: Esta dieta não é personalizada, tente gerar a dieta novamente mais tarde.
+              Causa: o uso de tokens da api do openRouter chegou ao seu limite.
+              Café da manhã: 2 ovos cozidos, 1 fatia de pão integral, 1 banana.
+              Almoço: 100g de peito de frango grelhado, 1/2 xícara de arroz integral, salada de folhas verdes com azeite.
+              Lanche: 1 iogurte natural, 10 amêndoas.
+              Jantar: 1 omelete com 2 ovos e vegetais, 1 fatia de pão integral.
+            `,
+            ultimaRequisicao: data.Chat?.ultimaRequisicao || "",
           },
         });
       } catch (err) {
@@ -226,6 +241,11 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold mb-8">Bem vindo, {userData.nome}</h1>
 
           <Tabs defaultValue="macros" className="space-y-8">
+          <div className="bg-blue-50 text-blue-700 p-4 rounded-md text-sm">
+    <p>
+      Você pode personalizar melhor seus macronutrientes editando suas informações no perfil
+    </p>
+  </div>
             <TabsList>
               <TabsTrigger value="macros">Macronutrientes</TabsTrigger>
               <TabsTrigger value="diet">Sugestão de dieta</TabsTrigger>
