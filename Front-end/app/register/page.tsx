@@ -43,12 +43,12 @@ export default function RegisterPage() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
-  
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setError("")
-  
+
     if (formData.senha !== formData.confirmarSenha) {
       setError("As senhas não coincidem")
       setIsLoading(false)
@@ -61,10 +61,10 @@ export default function RegisterPage() {
       if (response.data) {
         const tmbResponse = await apiUser.post(`user/tmbCalculator/${formData.email}`);
         if (!tmbResponse.data) throw new Error("Erro ao calcular TMB.");
-    
+
         const macrosResponse = await apiUser.post(`/user/macros/${formData.email}`, { calorias: formData.calorias });
         if (!macrosResponse.data) throw new Error("Erro ao calcular macros.");
-    
+
         const dietResponse = await apiUser.post(`/chat/generateDiet/${formData.email}`);
         if (!dietResponse.data) throw new Error("Erro ao gerar dieta.");
       }
@@ -72,9 +72,12 @@ export default function RegisterPage() {
       setTimeout(() => {
         router.push("/dashboard");
       }, 1000);
-    } catch (err) {
-      console.log(err);
-      setError("Falha no registro. Por favor, tente novamente.");
+    } catch (err: any) {
+      if (err.response?.status === 400) {
+        setError(err.response.data.message);
+      } else {
+        setError("Erro ao registrar usuário. Tente novamente mais tarde.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -178,70 +181,60 @@ export default function RegisterPage() {
                   </RadioGroup>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Objetivo</Label>
-                <RadioGroup
-                  name="goal"
-                  value={formData.objetivo}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, objetivo: value }))}
-                  className="grid grid-cols-1 gap-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Emagrecimento" id="emagrecimento" />
-                    <Label htmlFor="emagrecimento">Emagrecimento</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Manutenção" id="manutencao" />
-                    <Label htmlFor="manutencao">Manutenção</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Ganho de massa" id="ganho" />
-                    <Label htmlFor="ganho">Ganho de massa</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              <div className="space-y-2">
-                <Label>Nível de Atividade</Label>
-                <RadioGroup
-                  name="activityLevel"
-                  value={formData.nivelAtividade}
-                  onValueChange={(value) => setFormData((prev) => ({ ...prev, nivelAtividade: value }))}
-                  className="grid grid-cols-1 gap-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Sedentário" id="sedentary" />
-                    <Label htmlFor="sedentary">Sedentário (pouco ou nenhum exercício)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Leve" id="light" />
-                    <Label htmlFor="light">Leve (exercício 1-3 dias/semana)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Moderado" id="moderate" />
-                    <Label htmlFor="moderate">Moderado (exercício 3-5 dias/semana)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Ativo" id="active" />
-                    <Label htmlFor="active">Ativo (exercício 6-7 dias/semana)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="Muito ativo" id="veryActive" />
-                    <Label htmlFor="veryActive">Muito Ativo (exercício intenso diário)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="caloriasObjetivo">
-                  Quantidade de calorias para ganho ou perda (se não tiver um número em mente, nós te ajudaremos!)
-                  </Label>
-                <Input
-                  id="calorias"
-                  name="calorias"
-                  type="number"
-                  value={formData.calorias}
-                  onChange={handleChange}
-                  placeholder="0"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Objetivo</Label>
+                  <RadioGroup
+                    name="goal"
+                    value={formData.objetivo}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, objetivo: value }))}
+                    className="grid grid-cols-1 gap-1"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Emagrecimento" id="emagrecimento" />
+                      <Label htmlFor="emagrecimento">Emagrecimento</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Manutenção" id="manutencao" />
+                      <Label htmlFor="manutencao">Manutenção</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Ganho de massa" id="ganho" />
+                      <Label htmlFor="ganho">Ganho de massa</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Nível de Atividade</Label>
+                  <RadioGroup
+                    name="activityLevel"
+                    value={formData.nivelAtividade}
+                    onValueChange={(value) => setFormData((prev) => ({ ...prev, nivelAtividade: value }))}
+                    className="grid grid-cols-1 gap-1"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Sedentário" id="sedentary" />
+                      <Label htmlFor="sedentary">Sedentário</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Leve" id="light" />
+                      <Label htmlFor="light">Leve</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Moderado" id="moderate" />
+                      <Label htmlFor="moderate">Moderado</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Ativo" id="active" />
+                      <Label htmlFor="active">Ativo</Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Muito ativo" id="veryActive" />
+                      <Label htmlFor="veryActive">Muito Ativo</Label>
+                    </div>
+                  </RadioGroup>
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">

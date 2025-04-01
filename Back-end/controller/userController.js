@@ -28,10 +28,10 @@ export const registerUser = async (req, res) => {
     });
   }
 
-  const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+  const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
     if (!passwordRegex.test(senha)) {
       return res.status(400).json({
-        message: "A senha deve ter no mínimo 8 caracteres, incluindo uma letra maiúscula, um número e um símbolo especial."
+        message: "A senha deve ter no mínimo 8 dígitos, um caractere especial e uma letra maiúscula"
       });
     }
 
