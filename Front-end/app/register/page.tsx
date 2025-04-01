@@ -236,19 +236,6 @@ export default function RegisterPage() {
                   </RadioGroup>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="caloriasObjetivo">
-                  Quantidade de calorias para ganho ou perda (se não tiver um número em mente, nós te ajudaremos!)
-                </Label>
-                <Input
-                  id="calorias"
-                  name="calorias"
-                  type="number"
-                  value={formData.calorias}
-                  onChange={handleChange}
-                  placeholder="0"
-                />
-              </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isLoading}>
