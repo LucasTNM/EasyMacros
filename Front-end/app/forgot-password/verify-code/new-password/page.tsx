@@ -20,7 +20,7 @@ export default function NewPasswordPage() {
   const router = useRouter()
 
   const apiUser = axios.create({
-    baseURL: "https://easymacros.onrender.com/api/user",
+    baseURL: `${process.env.NEXT_PUBLIC_API_URL}/user`,
     headers: {
       "Content-Type": "application/json",
     },
@@ -69,8 +69,11 @@ export default function NewPasswordPage() {
         router.push("/login");
       }, 2000);
     } catch (err: any) {
-      console.error("Erro ao criar nova senha:", err.message || err);
-      setError(err.message || "Erro ao criar nova senha. Por favor, tente novamente.");
+      if (err.response?.status === 422) {
+        setError(err.response.data.message);
+      } else {
+        setError(err.response.data.message || "Erro ao criar nova senha. Por favor, tente novamente.");
+      }
     } finally {
       setIsLoading(false);
     }

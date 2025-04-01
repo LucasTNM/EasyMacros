@@ -42,7 +42,7 @@ export default function DashboardPage() {
   const [generateDietError, setGenerateDietError] = useState("");
 
   const apiUser = axios.create({
-    baseURL: "https://easymacros.onrender.com/api",
+    baseURL: `${process.env.NEXT_PUBLIC_API_URL}`,
     withCredentials: true,
   });
 

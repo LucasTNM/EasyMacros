@@ -19,7 +19,7 @@ export default function LoginPage() {
   const router = useRouter()
 
   const apiUser = axios.create({
-    baseURL: 'https://easymacros.onrender.com/api/user',
+    baseURL: `${process.env.NEXT_PUBLIC_API_URL}/user`,
     headers: {
       'Content-Type': 'application/json',
     },

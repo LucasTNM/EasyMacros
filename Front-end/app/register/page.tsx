@@ -28,7 +28,7 @@ export default function RegisterPage() {
   })
 
   const apiUser = axios.create({
-    baseURL: 'https://easymacros.onrender.com/api',
+    baseURL: `${process.env.NEXT_PUBLIC_API_URL}`,
     headers: {
       'Content-Type': 'application/json',
     },

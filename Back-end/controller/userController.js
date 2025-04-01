@@ -389,7 +389,7 @@ export const createNewPassword = async (req, res) => {
     
     const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
     if (!passwordRegex.test(senha)) {
-      return res.status(400).json({
+      return res.status(422).json({
         message: "A senha deve ter no mínimo 8 dígitos, um caractere especial e uma letra maiúscula"
       });
     }
