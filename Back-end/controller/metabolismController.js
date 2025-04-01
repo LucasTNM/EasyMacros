@@ -113,7 +113,7 @@ export const tmbCalculator = async (req, res) => {
         if (userInfo.objetivo === "Emagrecimento") {
             gastoTotalDiario -= caloriasValidas;
             if (gastoTotalDiario < userMetabolism.taxaMetabolicaBasal) {
-                return res.status(500).json({ 
+                return res.status(400).json({ 
                     message: "O número de calorias está muito baixo, diminua o déficit ou deixe que nós ajustamos para você. "
                 })
             }
@@ -144,7 +144,7 @@ export const tmbCalculator = async (req, res) => {
   
         let proteinas = Math.round(peso * proteinFactor);
         let gorduras = Math.round((gastoTotalDiario * fatFactor) / 9);
-        let carboidratos = Math.max(0, Math.round((gastoTotalDiario - (proteinas * 4) - (gorduras * 9)) / 4)); // Evita valores negativos
+        let carboidratos = Math.max(0, Math.round((gastoTotalDiario - (proteinas * 4) - (gorduras * 9)) / 4));
   
         return { proteinas, carboidratos, gorduras };
       };

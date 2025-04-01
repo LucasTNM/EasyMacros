@@ -92,8 +92,8 @@ export default function NewPasswordPage() {
       <main className="flex-1 flex items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl">Esqueceu sua senha?</CardTitle>
-            <CardDescription>Insira seu email para receber um link de recuperação</CardDescription>
+            <CardTitle className="text-2xl">Redefina sua senha</CardTitle>
+            <CardDescription>Insira a senha, em seguida, comfirme.</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
