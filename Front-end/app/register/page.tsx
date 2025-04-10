@@ -55,10 +55,18 @@ export default function RegisterPage() {
       return
     }
 
+    let passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])(?=.{8,}).*$/;
+
+    if (!passwordRegex.test(formData.senha)) {
+      setError("A senha deve ter no mínimo 8 caracteres, uma letra maiúscula, um número e um caractere especial.");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await apiUser.post('/user/register', formData);
 
-      if (response.data) {
+      if (response.data && response.status === 201) {
         const tmbResponse = await apiUser.post(`user/tmbCalculator/${formData.email}`);
         if (!tmbResponse.data) throw new Error("Erro ao calcular TMB.");
 
@@ -67,6 +75,9 @@ export default function RegisterPage() {
 
         const dietResponse = await apiUser.post(`/chat/generateDiet/${formData.email}`);
         if (!dietResponse.data) throw new Error("Erro ao gerar dieta.");
+        
+      } else {
+        throw new Error("Erro ao criar usuário. Verifique os dados e tente novamente.");
       }
 
       setTimeout(() => {
@@ -215,23 +226,23 @@ export default function RegisterPage() {
                   >
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="Sedentário" id="sedentary" />
-                      <Label htmlFor="sedentary">Sedentário</Label>
+                      <Label htmlFor="sedentary">Sedentário (pouco ou nenhum exercício)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="Leve" id="light" />
-                      <Label htmlFor="light">Leve</Label>
+                      <Label htmlFor="light">Leve (exercício 1-3 dias/semana)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="Moderado" id="moderate" />
-                      <Label htmlFor="moderate">Moderado</Label>
+                      <Label htmlFor="moderate">Moderado (exercício 3-5 dias/semana)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="Ativo" id="active" />
-                      <Label htmlFor="active">Ativo</Label>
+                      <Label htmlFor="active">Ativo (exercício 6-7 dias/semana)</Label>
                     </div>
                     <div className="flex items-center space-x-2">
                       <RadioGroupItem value="Muito ativo" id="veryActive" />
-                      <Label htmlFor="veryActive">Muito Ativo</Label>
+                      <Label htmlFor="veryActive">Muito Ativo (exercício intenso diário)</Label>
                     </div>
                   </RadioGroup>
                 </div>

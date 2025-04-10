@@ -76,7 +76,7 @@ export const registerUser = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ message: "Erro ao registrar usuário.  " + err });
+    res.status(500).json({ message: "Erro ao registrar usuário. " });
   }
 };
 
