@@ -49,9 +49,9 @@ export const GenerateDiet = async (req, res) => {
 - Gorduras: ${metabolism.gorduras}g
 - Calorias: ${metabolism.consumo} kcal
 
-A dieta deve conter café da manhã, almoço, lanche e jantar. 
-Liste apenas os alimentos e suas quantidades, sem introduções ou explicações adicionais. 
-O texto deve estar em português.`;
+A dieta deve incluir café da manhã, almoço, lanche e jantar.
+Apresente os alimentos e suas quantidades em formato de lista com marcadores, seguidos pelo total de calorias. 
+O texto deve ser direto, sem introduções ou explicações adicionais, e estar em português.`;
 
     const response = await axios.post(
       "https://openrouter.ai/api/v1/chat/completions",
