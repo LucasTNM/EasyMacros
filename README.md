@@ -2,6 +2,8 @@
 
 **PT-BR | EN**
 
+Deploy (acesso ao projeto): https://easy-macros.vercel.app/
+
 ---
 
 ## 📌 Descrição | Description
