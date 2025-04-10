@@ -223,6 +223,14 @@ export default function DashboardPage() {
     }
   };
 
+  const Wellcome = () => {
+    if(userData.userInfo.sexo === "Masculino") {
+      return "Bem vindo,";
+    } else {
+      return "Bem vinda,";
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b">
@@ -255,7 +263,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              <h1 className="text-3xl font-bold mb-8">Bem vindo, {userData.nome}</h1>
+              <h1 className="text-3xl font-bold mb-8">{Wellcome()} {userData.nome}</h1>
               <Tabs defaultValue="macros" className="space-y-8">
                 <div className="bg-blue-50 text-blue-700 p-4 rounded-md text-sm">
                   <p>
