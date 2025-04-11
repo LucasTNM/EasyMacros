@@ -7,6 +7,7 @@ export const generateTokenAndSetCookie = (res, userId) => {
 
   res.cookie("token", token, {
     httpOnly: true,
+    partitioned: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 3600000,
@@ -16,9 +17,10 @@ export const generateTokenAndSetCookie = (res, userId) => {
 };
 
 export const clearAuthCookie = (res) => {
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
-  };
+  res.clearCookie("token", {
+    httpOnly: true,
+    partitioned: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+};
